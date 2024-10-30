@@ -1,0 +1,29 @@
+2024/10/30-00:32:00.512 924 Reusing MANIFEST E:\4TransferData\web-ai\whatsapp-bot-ai-gemini\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2024/10/30-00:32:00.513 924 Recovering log #1465
+2024/10/30-00:32:00.545 924 Reusing old log E:\4TransferData\web-ai\whatsapp-bot-ai-gemini\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/001465.log 
+2024/10/30-00:32:02.913 7360 Level-0 table #1478: started
+2024/10/30-00:32:02.934 7360 Level-0 table #1478: 180272 bytes OK
+2024/10/30-00:32:02.944 7360 Delete type=0 #1465
+2024/10/30-00:32:02.945 7360 Manual compaction at level-0 from '\x00K\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00L\x00\x00\x00' @ 0 : 0; will stop at (end)
+2024/10/30-00:32:05.484 7360 Compacting 1@1 + 9@2 files
+2024/10/30-00:32:05.795 7360 Generated table #1479@1: 84386 keys, 2233027 bytes
+2024/10/30-00:32:06.029 7360 Generated table #1480@1: 71087 keys, 2276714 bytes
+2024/10/30-00:32:06.236 7360 Generated table #1481@1: 21895 keys, 2165413 bytes
+2024/10/30-00:32:12.032 7360 Generated table #1482@1: 18954 keys, 2173242 bytes
+2024/10/30-00:32:12.267 7360 Generated table #1483@1: 17024 keys, 2213936 bytes
+2024/10/30-00:32:12.626 7360 Generated table #1484@1: 36744 keys, 2230602 bytes
+2024/10/30-00:32:12.824 7360 Generated table #1485@1: 13343 keys, 2174736 bytes
+2024/10/30-00:32:13.083 7360 Generated table #1486@1: 104691 keys, 2257557 bytes
+2024/10/30-00:32:13.201 7360 Generated table #1487@1: 45915 keys, 947456 bytes
+2024/10/30-00:32:13.201 7360 Compacted 1@1 + 9@2 files => 18672683 bytes
+2024/10/30-00:32:13.203 7360 compacted to: files[ 0 0 9 0 0 0 0 ]
+2024/10/30-00:32:13.204 7360 Delete type=2 #1467
+2024/10/30-00:32:13.204 7360 Delete type=2 #1468
+2024/10/30-00:32:13.204 7360 Delete type=2 #1469
+2024/10/30-00:32:13.204 7360 Delete type=2 #1470
+2024/10/30-00:32:13.204 7360 Delete type=2 #1471
+2024/10/30-00:32:13.204 7360 Delete type=2 #1472
+2024/10/30-00:32:13.204 7360 Delete type=2 #1473
+2024/10/30-00:32:13.204 7360 Delete type=2 #1474
+2024/10/30-00:32:13.204 7360 Delete type=2 #1475
+2024/10/30-00:32:13.204 7360 Delete type=2 #1478
