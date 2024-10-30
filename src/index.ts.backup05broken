@@ -1,0 +1,146 @@
+import express, { Request, Response } from "express";
+import axios from "axios";
+import { Client, LocalAuth, Message, MessageMedia } from "whatsapp-web.js";
+import qrcode from "qrcode-terminal";
+import { GoogleGenerativeAI, ChatSession } from "@google/generative-ai";
+import 'dotenv/config';
+
+const genAI = new GoogleGenerativeAI(process.env.API_KEY!);
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const port = 5000;
+
+async function mediaToGenerativePart(media: MessageMedia) {
+  return {
+    inlineData: { data: media.data, mimeType: media.mimetype },
+  };
+}
+
+const whatsappClient = new Client({
+  authStrategy: new LocalAuth(),
+  puppeteer: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox'], 
+  },
+});
+
+whatsappClient.on("qr", (qr: string) => {
+  qrcode.generate(qr, { small: true });
+  console.log("QR Code received, scan with your phone.");
+});
+
+whatsappClient.on("ready", () => {
+  console.log("WhatsApp Web client is ready!");
+});
+
+whatsappClient.on("message", async (msg: Message) => {
+  const senderNumber: string = msg.from;
+  const message: string = msg.body;
+
+  console.log(`Received message from ${senderNumber}: ${message}`);
+
+  let mediaPart = null;
+
+  if (msg.hasMedia) {
+    const media = await msg.downloadMedia();
+    mediaPart = await mediaToGenerativePart(media);
+  }
+
+  await run(message, senderNumber, mediaPart);
+});
+
+whatsappClient.initialize();
+
+let chat: ChatSession | null = null;
+
+// Fungsi untuk mengambil history chat dengan 3 pesan bot dan 3 pesan user
+async function getChatHistory(msg: Message): Promise<string[]> {
+  const chat = await msg.getChat();
+  const messages = await chat.fetchMessages({ limit: 7 }); // Ambil 7 pesan (3 user, 3 bot, dan 1 pesan terbaru)
+
+  let userMessages: string[] = [];
+  let botMessages: string[] = [];
+
+  // Iterate through messages and categorize them by sender (user or bot)
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+
+    if (message.fromMe) {
+      botMessages.push(`Bot: ${message.body}`);
+    } else {
+      userMessages.push(`User: ${message.body}`);
+    }
+
+    if (botMessages.length === 3 && userMessages.length === 3) {
+      break;
+    }
+  }
+
+  // Keep the last 3 user and bot messages in sequence (most recent last)
+  const combinedMessages: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    if (botMessages[i]) {
+      combinedMessages.push(botMessages[i]);
+    }
+    if (userMessages[i]) {
+      combinedMessages.push(userMessages[i]);
+    }
+  }
+
+  // Tambahkan pesan terbaru user yang baru saja dikirim
+  combinedMessages.push(`User: ${msg.body}`);
+
+  return combinedMessages;
+}
+
+async function run(message: string, senderNumber: string, mediaPart?: any): Promise<void> {
+  try {
+    const model = genAI.getGenerativeModel({ model: "disabled-gemini-1.5-flash-8b" });
+
+    if (!chat) {
+      chat = model.startChat({
+        generationConfig: {
+          maxOutputTokens: 120,
+        },
+      });
+    }
+
+    // Ambil chat history dari fungsi getChatHistory
+    const history = await getChatHistory(message);
+    
+    // Log chat history ke console sebelum dikirim ke Google Gemini
+    console.log("Chat History to send to Google Gemini:");
+    console.log(history);
+
+    // Gabungkan pesan history untuk dijadikan prompt yang dikirim ke Gemini
+    const prompt = history.join("\n"); // Gabungkan chat history dengan newline
+
+    const result = await chat.sendMessage([prompt]);
+    const response = await result.response;
+    const text: string = response.text();
+
+    if (text) {
+      console.log("Generated Text:", text);
+      await sendWhatsAppMessage(text, senderNumber);
+    } else {
+      console.error("This problem is related to Model Limitations and API Rate Limits");
+    }
+
+  } catch (error) {
+    console.error("Error in run function:", error);
+    await sendWhatsAppMessage("Oops, an error occurred. Please try again later.", senderNumber);
+  }
+}
+
+async function sendWhatsAppMessage(text: string, toNumber: string): Promise<void> {
+  try {
+    await whatsappClient.sendMessage(toNumber, text);
+  } catch (err) {
+    console.error("Failed to send WhatsApp message:");
+    console.error("Error details:", err);
+  }
+}
+
+app.listen(port, () => console.log(`Express app running on port ${port}!`));
